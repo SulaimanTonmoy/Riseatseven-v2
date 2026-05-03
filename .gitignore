@@ -1,1 +1,10 @@
-node_modules/
+﻿node_modules/
+.netlify/
+windsurf-project-2.code-workspace
+.windsurf/
+windsurf_deployment.yaml
+DataURI/
+ka-p.fontawesome.com/
+kit.fontawesome.com/
+player.vimeo.com/
+rise-atseven.transforms.svdcdn.com/
