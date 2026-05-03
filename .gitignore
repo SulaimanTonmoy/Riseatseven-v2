@@ -1,10 +1,26 @@
-﻿node_modules/
-.netlify/
-windsurf-project-2.code-workspace
-.windsurf/
-windsurf_deployment.yaml
-DataURI/
-ka-p.fontawesome.com/
-kit.fontawesome.com/
-player.vimeo.com/
-rise-atseven.transforms.svdcdn.com/
+﻿# Ignore everything by default
+*
+
+# Whitelist directories
+!assets/
+!dist/
+!fonts/
+!src/
+!video/
+
+# Ensure contents of whitelisted directories are tracked
+!assets/**
+!dist/**
+!fonts/**
+!src/**
+!video/**
+
+# Whitelist specific root files
+!index.html
+!netlify.toml
+!README.md
+!readme.md
+!script.js
+!scripts.js
+!styles.css
+!.gitignore
