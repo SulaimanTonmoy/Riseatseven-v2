@@ -1,0 +1,22 @@
+# Ignore everything
+*
+
+# Except these specific files and directories
+!src/
+!video/
+!index.html
+!netlify.toml
+!fonts/
+!dist/
+!.gitignore
+!README.md
+!script.js
+!styles.css
+
+# Specifically ignore the workspace file
+windsurf-project-2.code-workspace
+
+# Specifically ignore other project metadata
+.windsurf/
+windsurf_deployment.yaml
+node_modules/
