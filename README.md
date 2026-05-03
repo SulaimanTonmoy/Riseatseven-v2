@@ -1,4 +1,4 @@
-# Rise at Seven Website Replica
+# Rise at Seven v2
 
 A modern, responsive replica of the Rise at Seven website built with vanilla HTML, CSS, and JavaScript. This project recreates the design and functionality of the award-winning search-first content marketing agency's website.
 
