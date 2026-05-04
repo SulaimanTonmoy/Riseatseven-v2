@@ -198,11 +198,24 @@ fbq('track', 'PageView');
          data-barba="wrapper"
          x-data
          x-init="
+            // Disable all external links and keep it as a home page only
+            document.addEventListener('click', (e) => {
+                const link = e.target.closest('a');
+                if (link && link.getAttribute('href') && !link.getAttribute('href').startsWith('#')) {
+                    e.preventDefault();
+                    console.log('Navigation disabled: keeping as home page only.');
+                }
+            }, true);
+
             viewportHeight = window.innerHeight * 0.01;
             document.documentElement.style.setProperty('--vh', `${viewportHeight}px`);
 
-            // Initialize smooth scroll reveal for sections
+            // Initialize smooth scroll reveal for sections (hero only)
             gsap.utils.toArray('section').forEach(section => {
+                if (!section.classList.contains('js-hero-section')) {
+                    return;
+                }
+
                 gsap.from(section, {
                     opacity: 0,
                     y: 30,
@@ -210,27 +223,30 @@ fbq('track', 'PageView');
                     ease: 'power2.out',
                     scrollTrigger: {
                         trigger: section,
-                        start: 'top 90%',
+                        start: 'top 92%',
                         toggleActions: 'play none none reverse'
                     }
                 });
             });
 
-            // Heading split text animation logic
-            gsap.utils.toArray('.js-heading-animate').forEach(heading => {
-                const words = heading.querySelectorAll('.js-word');
-                gsap.from(words, {
-                    yPercent: 100,
-                    opacity: 0,
-                    duration: 1,
-                    stagger: 0.05,
-                    ease: 'power4.out',
-                    scrollTrigger: {
-                        trigger: heading,
-                        start: 'top 85%'
-                    }
+            // Heading split text animation logic (hero only)
+            const heroSection = document.querySelector('.js-hero-section');
+            if (heroSection) {
+                heroSection.querySelectorAll('.js-heading-animate').forEach(heading => {
+                    const words = heading.querySelectorAll('.js-word');
+                    gsap.from(words, {
+                        yPercent: 100,
+                        opacity: 0,
+                        duration: 1,
+                        stagger: 0.05,
+                        ease: 'power4.out',
+                        scrollTrigger: {
+                            trigger: heading,
+                            start: 'top 85%'
+                        }
+                    });
                 });
-            });
+            }
 
             // Hero section background image
             const heroContainer = document.querySelector('.js-random-image-container-2412');
@@ -271,9 +287,9 @@ src="https://www.facebook.com/tr?id=2337836320038792&ev=PageView&noscript=1" /><
 
 		
 		
-<div
-    class="fixed inset-0 w-screen h-screen-fix h-svh z-[100] pointer-events-none hidden | pointer-fine:block"
-    x-init="
+    <div
+        class="fixed inset-0 w-full h-svh z-[100] pointer-events-none hidden | pointer-fine:block"
+        x-init="
         gsap.to('.js-reveal-ellipse', {
             attr: { rx: 2700, ry: 2150 },
             duration: 1.25,
@@ -282,7 +298,7 @@ src="https://www.facebook.com/tr?id=2337836320038792&ev=PageView&noscript=1" /><
     "
 >
 
-    <svg width="100%" height="100%" viewBox="0 0 1920 1080" preserveAspectRatio="none" class="block w-screen h-svh">
+    <svg width="100%" height="100%" viewBox="0 0 1920 1080" preserveAspectRatio="none" class="block w-full h-svh">
 
         <defs>
             <mask id="circle-reveal-mask">
@@ -299,11 +315,11 @@ src="https://www.facebook.com/tr?id=2337836320038792&ev=PageView&noscript=1" /><
 
 
 <div
-    class="fixed inset-0 w-screen h-screen-fix h-svh z-[100] hidden pointer-events-none | pointer-fine:block | js-leave-mask"
-    style="transform: translateZ(0); backface-visibility: hidden;"
+    class="fixed inset-0 w-full h-svh z-[100] hidden pointer-events-none | pointer-fine:block | js-leave-mask"
+    style="transform: translate3d(0,0,0); backface-visibility: hidden;"
 >
 
-    <svg width="100%" height="100%" preserveAspectRatio="none" class="block w-screen h-screen=fix js-leave-svg">
+    <svg width="100%" height="100%" preserveAspectRatio="none" class="block w-full h-svh js-leave-svg">
 
         <ellipse
             class="js-leave-ellipse"
@@ -388,11 +404,16 @@ src="https://www.facebook.com/tr?id=2337836320038792&ev=PageView&noscript=1" /><
         class="pointer-events-none fixed z-[9999] isolate overflow-hidden rounded-full transition-all duration-300 ease-out flex items-center justify-center hidden pointer-fine:flex bg-mint text-grey-900 mix-blend-difference"
         x-ref="cursor"
         x-bind:class="{
-            'w-24 h-24 lg:w-32 lg:h-32 scale-100': active,
+            'w-20 h-20 lg:w-24 lg:h-24 scale-100': active,
             'w-0 h-0 scale-0': !active
         }"
         style="will-change: transform, width, height; transform: translate3d(0,0,0); position: fixed; top: 0; left: 0;"
     >
+        <template x-if="icon">
+            <svg class="w-10 h-10 lg:w-12 lg:h-12 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17 7L7 17M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+        </template>
     </div>
 
     </div>
@@ -550,6 +571,7 @@ src="https://www.facebook.com/tr?id=2337836320038792&ev=PageView&noscript=1" /><
             hideAnnouncementBar: false,
             scrollPosition: 0,
             previousScrollPosition: 0,
+            scrollUpAccumulator: 0,
             scrollDirection: &#039;down&#039;,
             hoveringLink: false,
             previousMegaMenuId: null,
@@ -700,13 +722,25 @@ src="https://www.facebook.com/tr?id=2337836320038792&ev=PageView&noscript=1" /><
                     }
 
                     if (true) {
-                        if (_self.scrollDirection === &#039;down&#039; &amp;&amp; _self.scrollPosition &gt; 100) {
-                            _self.hideHeader = true;
-                        } else {
+                        // Hide immediately on scroll down; show on scroll up
+                        const scrollDelta = _self.scrollPosition - _self.previousScrollPosition;
+
+                        if (_self.scrollPosition &lt;= 20) {
                             _self.hideHeader = false;
+                            _self.scrollUpAccumulator = 0;
+                        } else if (Math.abs(scrollDelta) &lt; 8) {
+                            _self.hideHeader = _self.hideHeader;
+                        } else if (scrollDelta &gt; 0) {
+                            _self.hideHeader = true;
+                            _self.scrollUpAccumulator = 0;
+                        } else {
+                            _self.scrollUpAccumulator += Math.abs(scrollDelta);
+                            if (_self.scrollUpAccumulator &gt;= 40) {
+                                _self.hideHeader = false;
+                            }
                         }
                     } else {
-                        _self.hideHeader = _self.scrollPosition &gt; 100;
+                        _self.hideHeader = _self.scrollPosition &gt; 0;
                     }
 
                     if (_self.scrollPosition &gt; 100) {
@@ -767,17 +801,17 @@ src="https://www.facebook.com/tr?id=2337836320038792&ev=PageView&noscript=1" /><
         class="w-full fixed top-0 left-0 z-50 flex transition duration-700 h-18 | lg:h-22 lg:p-3"
         x-bind:class="{
             '-translate-y-full' : hideHeader || hideHeaderOverride,
-            'mt-10' : !hideAnnouncementBar,
-            'mt-0' : hideAnnouncementBar
+            'top-10' : !hideAnnouncementBar,
+            'top-0' : hideAnnouncementBar
         }"
     >
 
         
-        <div
-    class="w-full h-svh fixed top-0 left-0 z-50 opacity-0 pointer-events-none transition p-2 backdrop-blur-sm duration-1000 | js-modal | lg:hidden"
+    <div
+    class="w-full h-svh fixed top-0 left-0 z-50 opacity-0 pointer-events-none transition-all p-2 backdrop-blur-md duration-500 ease-in-out | js-modal | lg:hidden"
     x-bind:class="{
-        'pointer-events-none opacity-0': !mobileMenu,
-        'pointer-events-auto opacity-100': mobileMenu
+        'pointer-events-none opacity-0 translate-x-full': !mobileMenu,
+        'pointer-events-auto opacity-100 translate-x-0': mobileMenu
     }"
 >
 
@@ -3314,7 +3348,7 @@ src="https://www.facebook.com/tr?id=2337836320038792&ev=PageView&noscript=1" /><
 
 
 <section
-    class="w-full py-0"
+    class="w-full py-0 js-hero-section"
     
     
 >
@@ -3335,7 +3369,7 @@ src="https://www.facebook.com/tr?id=2337836320038792&ev=PageView&noscript=1" /><
             </div>
 
             
-            <div class="w-full h-screen-fix h-svh relative p-2">
+            <div class="w-full h-svh relative p-2">
 
                 
                 <div class="items-end justify-between absolute bottom-0 left-0 z-30 w-full p-7 flex">
@@ -5177,7 +5211,7 @@ Category</div><div class="inline shrink-0 flex bg-black/10 relative overflow-hid
 
 
 <section
-    class="w-full pb-12 | xl:pb-24"
+    class="w-full pb-0 | xl:pb-24"
     
     
 >
@@ -5186,11 +5220,15 @@ Category</div><div class="inline shrink-0 flex bg-black/10 relative overflow-hid
 
         
 
-            <div class="w-full relative -my-7 flex overflow-hidden | pointer-fine:overflow-visible | js-trigger-40">
+<div class="w-full relative my-0 flex overflow-hidden | pointer-fine:-my-7 pointer-fine:overflow-visible | js-trigger-40">
 
-                <div class="w-full py-7 top-0 h-screen-fix-110 | pointer-fine:h-screen-fix pointer-fine:sticky">
+                <div class="w-full py-7 top-0 h-svh | pointer-fine:py-7 pointer-fine:h-svh pointer-fine:sticky">
 
                     <div class="w-full h-full overflow-hidden bg-grey-900 rounded-3xl grid grid-cols-12 px-5 | lg:pl-8 lg:pr-8 | xl:pl-10 xl:pr-10">
+
+                        <div class="col-span-12 pt-6 pb-6 | lg:hidden">
+                            <h2 class="inline-flex flex-wrap text-balance relative text-left justify-start text-white text-md/tight | lg:text-lg/tight | xl:text-xl/tight | 4xl:text-2xl/none font-sans-primary font-medium tracking-tight js-heading">Featured Work</h2>
+                        </div>
 
                         
                         <div class="relative col-span-12 items-start hidden | lg:flex lg:flex-row lg:items-center | lg:col-span-6 lg:h-[96svh] | 4xl:col-span-6">
@@ -5611,22 +5649,7 @@ Category</div><div class="inline shrink-0 flex bg-black/10 relative overflow-hid
                         </div>
 
                         
-                        <div class="col-span-12 grid pt-7 pb-14 | lg:col-span-6 lg:col-start-7 | | 3xl:col-span-5 3xl:col-start-8 | 4xl:col-span-5 4xl:col-start-8 | js-images-40">
-
-                            
-                            <div class="mb-5 | lg:hidden">
-
-                                
-
-
-
-
-
-
-
-
-<h2 class="inline-flex flex-wrap text-balance relative   text-left justify-start text-white text-md/tight | lg:text-lg/tight | xl:text-xl/tight | 4xl:text-2xl/none font-sans-primary font-medium tracking-tight js-heading" >Featured Work</h2>
-                            </div>
+                        <div class="col-span-12 grid pt-0 pb-14 | lg:col-span-6 lg:col-start-7 | | 3xl:col-span-5 3xl:col-start-8 | 4xl:col-span-5 4xl:col-start-8 | js-images-40">
 
                             
                                 <a
@@ -7796,7 +7819,7 @@ Category</div><div class="inline shrink-0 flex bg-black/10 relative overflow-hid
 
 
 <section
-    class="w-full pb-12 | xl:pb-24"
+    class="w-full pt-12 pb-12 | xl:pt-24 xl:pb-24"
     
     
 >
@@ -10010,7 +10033,7 @@ Category</div><div class="inline shrink-0 flex bg-black/10 relative overflow-hid
                 style="height: 300vh;"
             >
 
-                <div class="w-full h-screen-fix h-svh sticky top-0 left-0 overflow-hidden">
+                <div class="w-full h-svh sticky top-0 left-0 overflow-hidden">
 
                     
                     <div class="absolute top-0 left-0 w-full flex justify-center mt-10 | 3xl:mt-16">
@@ -11771,7 +11794,7 @@ Category</div><div class="inline shrink-0 flex bg-black/10 relative overflow-hid
                         
                             
                                 <div class="text-white font-light leading-tight text-1xs | md:text-xs">
-                                    Â© 2025 Rise at Seven Ltd. All rights reserved
+                                     @ 2025 Rise at Seven Ltd. All rights reserved
                                 </div>
 
                             
@@ -11819,7 +11842,7 @@ Category</div><div class="inline shrink-0 flex bg-black/10 relative overflow-hid
                     
                     <div class="w-full mt-1 | md:ml-auto md:text-right | lg:mt-0 lg:w-auto">
                         <a href="https://madebyshape.co.uk" target="_blank" class="text-white font-light leading-tight text-1xs | md:text-xs | link">
-                            Website MadeByShape
+                            Website MadeBySulaiman
                         </a>
                     </div>
 
