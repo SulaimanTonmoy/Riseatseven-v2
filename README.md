@@ -180,6 +180,4 @@ Feel free to submit issues or enhancement requests!
 
 This project is for educational purposes to demonstrate modern web development techniques.
 
----
 
-**Built with ❤️ using modern web standards**
